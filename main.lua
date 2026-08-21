@@ -1,14 +1,14 @@
 -- ============================================================
--- OMAR HUB - ULTIMATE DEEP-HWID & ANTI-KICK ENGINE
+-- Yo Deals - ULTIMATE SMART DYNAMIC ACTIVATION ENGINE
 -- ============================================================
-print("Omar Hub: Initializing Deep Hardware Security...")
+print("Yo Deals: Initializing Smart Key Activation & Device Binding...")
 
 local Players = game:GetService("Players")
 local CoreGui = game:GetService("CoreGui")
 local UserInputService = game:GetService("UserInputService")
 local plr = Players.LocalPlayer
 
--- 0. نسخ رابط الديسكورد تلقائياً للحافظة
+-- 1. نسخ رابط الديسكورد تلقائياً للحافظة فور التشغيل
 task.spawn(function()
     pcall(function()
         if setclipboard then
@@ -17,7 +17,7 @@ task.spawn(function()
     end)
 end)
 
--- 1. حماية الانتي-كيك المتقدمة (لمنع الطرد بسبب السرعة العالية أو البرين روت)
+-- 2. حماية الانتي-كيك القوية جداً لمنع الطرد العشوائي أو بسبب السرعة
 task.spawn(function()
     pcall(function()
         local mt = getrawmetatable(game)
@@ -36,87 +36,87 @@ task.spawn(function()
     end)
 end)
 
--- 2. دالة جلب بصمة الجهاز ونوعه بالمللي (حتى لو مسح دلتا ونزله تاني البصمة بتفضل محفوظة في الملفات)
-local function getDeepDeviceInfo()
+-- 3. دالة فحص بصمة الجهاز ونوعه بالكامل بدقة متناهية
+local function getTargetDeviceProfile()
     local success, hid = pcall(function()
-        return gethwid and gethwid() or identifyexecutor and identifyexecutor() or "UnknownExecutor"
+        return gethwid and gethwid() or identifyexecutor and identifyexecutor() or "UnknownDevice"
     end)
-    local platform = (UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled) and "Mobile_Touch" or "PC_Desktop"
-    local combinedID = tostring(hid) .. "_" .. platform
-    return combinedID
+    local platform = (UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled) and "Mobile_Phone" or "PC_Desktop"
+    return tostring(hid) .. "_" .. platform
 end
 
-local currentDeviceID = getDeepDeviceInfo()
-local KEY_FILE = "OmarHub_DeepSecure_V7.json"
+local currentDeviceProfile = getTargetDeviceProfile()
+local KEY_FILE = "YoDeals_Smart_Active_V12.json"
 
--- المفاتيح المعتمدة (مدة 7 أيام من أول تفعيل)
+-- جدول المفاتيح (كل مفتاح غير مفعل يظل متوقفاً، ولا يبدأ العداد إلا عند استخدامه لأول مرة)
 local ValidKeys = {
-    ["Omar_123"] = 7, 
-    ["Omar_555"] = 7, 
-    ["Omar_777"] = 7, 
-    ["Omar_665"] = 7, 
-    ["Omar_190"] = 7
+    ["Omar_123"] = true, 
+    ["Omar_555"] = true, 
+    ["Omar_777"] = true, 
+    ["Omar_665"] = true, 
+    ["Omar_190"] = true
 }
 
 local isVerified = false
 
--- 3. الفحص العميق للملفات (حتى لو مسح الإكسيكتور الملف بيقعد في الـ Workspace)
+-- 4. فحص فوري للملف المحلي (أقل من ثانية لمعرفة الجهاز والمفتاح ووقت الانتهاء)
 if pcall(function() return readfile(KEY_FILE) end) then
     local dataRaw = readfile(KEY_FILE)
-    local savedKey, savedDeviceID, expireTime = dataRaw:match("([^|]+)|([^|]+)|(%d+)")
+    -- القراءة: المفتاح | بصمة التليفون | وقت التفعيل | وقت انتهاء الصلاحية
+    local savedKey, savedDevice, regTime, expireTime = dataRaw:match("([^|]+)|([^|]+)|(%d+)|(%d+)")
     
-    if savedKey and savedDeviceID and expireTime then
-        -- لو نفس الجهاز ونفس بصمة التليفون بالمللي
-        if savedDeviceID == currentDeviceID then
+    if savedKey and savedDevice and expireTime then
+        if savedDevice == currentDeviceProfile then
+            -- العداد شغال بس للكود اللي تم تفعيله وبيه المهلة الزمنية (24 ساعة + ساعات إضافية لراحة اللاعب)
             if os.time() < tonumber(expireTime) then
                 isVerified = true
             else
                 pcall(function() delfile(KEY_FILE) end)
-                plr:Kick("انتهت صلاحية الـ 7 أيام! يجب تجديد الكود من سيرفر الديسكورد: https://discord.gg/drmUrBbz")
+                plr:Kick("Your key subscription has expired! Please renew from our Discord: https://discord.gg/drmUrBbz")
                 return
             end
         else
-            -- لو جهازه اتغير أو حاول يدخل من تليفون/إكسيكتور تاني بنفس الكود
-            plr:Kick("المفتاح مستخدم مسبقاً على جهاز آخر ولا يمكن تشغيله هنا! انضم للديسكورد: https://discord.gg/drmUrBbz")
+            -- محاولة استخدام المفتاح على جهاز آخر غير الذي قام بتفعيله
+            plr:Kick("Security Error: This key is already locked and used on another phone! Discord: https://discord.gg/drmUrBbz")
             return
         end
     end
 end
 
--- 4. واجهة تطلب الكود مرة واحدة فقط
+-- 5. واجهة إدخال المفتاح (تطلب مرة واحدة فقط في العمر ولن تظهر مجدداً)
 if not isVerified then
     local Gui = Instance.new("ScreenGui", CoreGui)
-    Gui.Name = "OmarKeyGui"
+    Gui.Name = "YoDealsKeyGui"
     Gui.ResetOnSpawn = false
 
     local Frame = Instance.new("Frame", Gui)
-    Frame.Size = UDim2.new(0, 310, 0, 140)
-    Frame.Position = UDim2.new(0.5, -155, 0.5, -70)
-    Frame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    Frame.Size = UDim2.new(0, 320, 0, 145)
+    Frame.Position = UDim2.new(0.5, -160, 0.5, -72)
+    Frame.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
     Instance.new("UICorner", Frame)
 
     local Title = Instance.new("TextLabel", Frame)
-    Title.Size = UDim2.new(1, 0, 0, 30)
+    Title.Size = UDim2.new(1, 0, 0, 35)
     Title.BackgroundTransparency = 1
-    Title.Text = "Omar Hub - التفعيل الأمني الدائم"
+    Title.Text = "Yo Deals - Secure Activation"
     Title.TextColor3 = Color3.fromRGB(255, 255, 255)
     Title.Font = Enum.Font.SourceSansBold
-    Title.TextSize = 14
+    Title.TextSize = 15
 
     local Box = Instance.new("TextBox", Frame)
-    Box.Size = UDim2.new(0.9, 0, 0, 35)
+    Box.Size = UDim2.new(0.9, 0, 0, 38)
     Box.Position = UDim2.new(0.05, 0, 0.3, 0)
-    Box.PlaceholderText = "أدخل المفتاح (يُستخدم مرة واحدة فقط)..."
-    Box.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    Box.PlaceholderText = "Please enter your key here..."
+    Box.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
     Box.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Box.TextSize = 12
+    Box.TextSize = 13
     Instance.new("UICorner", Box)
 
     local Btn = Instance.new("TextButton", Frame)
-    Btn.Size = UDim2.new(0.9, 0, 0, 35)
+    Btn.Size = UDim2.new(0.9, 0, 0, 38)
     Btn.Position = UDim2.new(0.05, 0, 0.68, 0)
-    Btn.Text = "تفعيل وحفظ بصمة الجهاز نهائياً"
-    Btn.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
+    Btn.Text = "Verify & Lock to This Phone"
+    Btn.BackgroundColor3 = Color3.fromRGB(0, 140, 255)
     Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
     Btn.Font = Enum.Font.SourceSansBold
     Btn.TextSize = 13
@@ -125,42 +125,48 @@ if not isVerified then
     Btn.MouseButton1Click:Connect(function()
         local enteredKey = Box.Text
         if ValidKeys[enteredKey] then
-            local expTime = os.time() + (ValidKeys[enteredKey] * 24 * 60 * 60)
+            local currentTime = os.time()
             
-            -- حفظ الكود مع بصمة الجهاز ونوعه بالمللي في الملف
+            -- تفعيل العداد للمفتاح المستخدم فقط: 24 ساعة + ساعات إضافية (مثلاً 28 ساعة إجمالاً لتغطية الوقت لحد الساعة 1 أو 2 الفجر بمرونة)
+            local bonusHours = 28 
+            local expireTimestamp = currentTime + (bonusHours * 60 * 60)
+            
+            -- حفظ المفتاح، تفاصيل التليفون بالكامل، وقت التفعيل، ووقت الانتهاء بدقة داخل الملف
             pcall(function()
-                writefile(KEY_FILE, enteredKey .. "|" .. currentDeviceID .. "|" .. expTime)
+                local fullData = enteredKey .. "|" .. currentDeviceProfile .. "|" .. currentTime .. "|" .. expireTimestamp
+                writefile(KEY_FILE, fullData)
             end)
             
             isVerified = true
             Gui:Destroy()
         else
             Box.Text = ""
-            Box.PlaceholderText = "المفتاح غير صالح أو خطأ!"
+            Box.PlaceholderText = "Invalid Key! Try again..."
         end
     end)
 
     while not isVerified do task.wait(0.5) end
 end
 
--- 5. وظيفة عرض سيرفر الديسكورد فوق رأس اللاعب بخط أسود وصغير
-local function createDiscordTag()
+-- 6. عرض اسم Yo Deals وسيرفر الديسكورد فوق الرأس بالخط الطبيعي
+print("Yo Deals: Tag module loading...")
+local function createYoDealsTag()
     local function addTag(char)
         local head = char:WaitForChild("Head", 5)
         if not head then return end
-        if head:FindFirstChild("OmarDiscordTag") then return end
+        if head:FindFirstChild("YoDealsTag") then return end
 
         local bill = Instance.new("BillboardGui")
-        bill.Name = "OmarDiscordTag"
+        bill.Name = "YoDealsTag"
         bill.Adornee = head
-        bill.Size = UDim2.new(0, 200, 0, 40)
+        bill.Size = UDim2.new(0, 220, 0, 45)
         bill.StudsOffset = Vector3.new(0, 2.2, 0)
         bill.AlwaysOnTop = true
 
         local text = Instance.new("TextLabel", bill)
         text.Size = UDim2.new(1, 0, 1, 0)
         text.BackgroundTransparency = 1
-        text.Text = "Discord: https://discord.gg/drmUrBbz"
+        text.Text = "Yo Deals\nhttps://discord.gg/drmUrBbz"
         text.TextColor3 = Color3.fromRGB(0, 0, 0)
         text.TextStrokeTransparency = 1
         text.Font = Enum.Font.SourceSansBold
@@ -174,9 +180,9 @@ local function createDiscordTag()
 end
 
 -- ============================================================
--- تشغيل المحرك والسكريبتات الأساسية
+-- تشغيل المحرك والسكريبتات الأساسية لـ Yo Deals
 -- ============================================================
-createDiscordTag()
+createYoDealsTag()
 
 task.spawn(function()
     pcall(function()
@@ -185,4 +191,4 @@ task.spawn(function()
     end)
 end)
 
-print("Omar Hub: Deep-HWID & Anti-Kick Protection Fully Active!")
+print("Yo Deals: Smart Security & Tracking Fully Active!")
