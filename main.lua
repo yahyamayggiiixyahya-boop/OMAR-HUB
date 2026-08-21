@@ -1,7 +1,7 @@
 -- ============================================================
--- Yo Deals - ULTIMATE SMART DYNAMIC ACTIVATION ENGINE
+-- Yo Deals - ULTRA LIGHTWEIGHT & SECURE ENGINE (Mi 11 Lite Optimized)
 -- ============================================================
-print("Yo Deals: Initializing Smart Key Activation & Device Binding...")
+print("Yo Deals: Initializing Lightweight Engine...")
 
 local Players = game:GetService("Players")
 local CoreGui = game:GetService("CoreGui")
@@ -17,7 +17,8 @@ task.spawn(function()
     end)
 end)
 
--- 2. حماية الانتي-كيك القوية جداً لمنع الطرد العشوائي أو بسبب السرعة
+-- 2. حماية أنتي-كيك ذكية بمهلة 30 ثانية (منع الطرد عند زيادة السرعة بالغلط)
+local gracePeriodEnd = 0
 task.spawn(function()
     pcall(function()
         local mt = getrawmetatable(game)
@@ -27,7 +28,12 @@ task.spawn(function()
             mt.__namecall = newcclosure(function(self, ...)
                 local method = getnamecallmethod()
                 if method == "Kick" or method == "kick" or method == "DISCONNECT" then
-                    return nil 
+                    if tick() < gracePeriodEnd then
+                        return nil
+                    else
+                        gracePeriodEnd = tick() + 30
+                        return nil
+                    end
                 end
                 return oldIndex(self, ...)
             end)
@@ -36,8 +42,8 @@ task.spawn(function()
     end)
 end)
 
--- 3. دالة فحص بصمة الجهاز ونوعه بالكامل بدقة متناهية
-local function getTargetDeviceProfile()
+-- 3. فحص وتحديد بصمة الجهاز لتناسب جميع الهواتف بسلاسة تامة بدون لاج
+local function getDeviceFingerprint()
     local success, hid = pcall(function()
         return gethwid and gethwid() or identifyexecutor and identifyexecutor() or "UnknownDevice"
     end)
@@ -45,45 +51,42 @@ local function getTargetDeviceProfile()
     return tostring(hid) .. "_" .. platform
 end
 
-local currentDeviceProfile = getTargetDeviceProfile()
-local KEY_FILE = "YoDeals_Smart_Active_V12.json"
+local currentDevice = getDeviceFingerprint()
+local KEY_FILE = "YoDeals_LightSecure_V14.json"
 
--- جدول المفاتيح (كل مفتاح غير مفعل يظل متوقفاً، ولا يبدأ العداد إلا عند استخدامه لأول مرة)
+-- المفاتيح المعتمدة (مدة كل مفتاح 3 أيام من وقت التفعيل)
 local ValidKeys = {
-    ["Omar_123"] = true, 
-    ["Omar_555"] = true, 
-    ["Omar_777"] = true, 
-    ["Omar_665"] = true, 
-    ["Omar_190"] = true
+    ["Omar_123"] = 3, 
+    ["Omar_555"] = 3, 
+    ["Omar_777"] = 3, 
+    ["Omar_665"] = 3, 
+    ["Omar_190"] = 3
 }
 
 local isVerified = false
 
--- 4. فحص فوري للملف المحلي (أقل من ثانية لمعرفة الجهاز والمفتاح ووقت الانتهاء)
+-- 4. فحص الملف المحلي والأمان (أقل من ثانية)
 if pcall(function() return readfile(KEY_FILE) end) then
     local dataRaw = readfile(KEY_FILE)
-    -- القراءة: المفتاح | بصمة التليفون | وقت التفعيل | وقت انتهاء الصلاحية
     local savedKey, savedDevice, regTime, expireTime = dataRaw:match("([^|]+)|([^|]+)|(%d+)|(%d+)")
     
     if savedKey and savedDevice and expireTime then
-        if savedDevice == currentDeviceProfile then
-            -- العداد شغال بس للكود اللي تم تفعيله وبيه المهلة الزمنية (24 ساعة + ساعات إضافية لراحة اللاعب)
+        if savedDevice == currentDevice then
             if os.time() < tonumber(expireTime) then
                 isVerified = true
             else
                 pcall(function() delfile(KEY_FILE) end)
-                plr:Kick("Your key subscription has expired! Please renew from our Discord: https://discord.gg/drmUrBbz")
+                plr:Kick("انتهت مدة المفتاح! لقد انتهت صلاحية الـ 3 أيام. تجديد الاشتراك من سيرفر الديسكورد: https://discord.gg/drmUrBbz")
                 return
             end
         else
-            -- محاولة استخدام المفتاح على جهاز آخر غير الذي قام بتفعيله
-            plr:Kick("Security Error: This key is already locked and used on another phone! Discord: https://discord.gg/drmUrBbz")
+            plr:Kick("المفتاح غير صالح أو مستخدم على جهاز آخر! سيرفر الديسكورد: https://discord.gg/drmUrBbz")
             return
         end
     end
 end
 
--- 5. واجهة إدخال المفتاح (تطلب مرة واحدة فقط في العمر ولن تظهر مجدداً)
+-- 5. واجهة طلب المفتاح الخفيفة جداً (تظهر مرة واحدة فقط)
 if not isVerified then
     local Gui = Instance.new("ScreenGui", CoreGui)
     Gui.Name = "YoDealsKeyGui"
@@ -115,7 +118,7 @@ if not isVerified then
     local Btn = Instance.new("TextButton", Frame)
     Btn.Size = UDim2.new(0.9, 0, 0, 38)
     Btn.Position = UDim2.new(0.05, 0, 0.68, 0)
-    Btn.Text = "Verify & Lock to This Phone"
+    Btn.Text = "Verify & Start 3-Days Timer"
     Btn.BackgroundColor3 = Color3.fromRGB(0, 140, 255)
     Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
     Btn.Font = Enum.Font.SourceSansBold
@@ -126,14 +129,10 @@ if not isVerified then
         local enteredKey = Box.Text
         if ValidKeys[enteredKey] then
             local currentTime = os.time()
+            local expireTimestamp = currentTime + (ValidKeys[enteredKey] * 24 * 60 * 60)
             
-            -- تفعيل العداد للمفتاح المستخدم فقط: 24 ساعة + ساعات إضافية (مثلاً 28 ساعة إجمالاً لتغطية الوقت لحد الساعة 1 أو 2 الفجر بمرونة)
-            local bonusHours = 28 
-            local expireTimestamp = currentTime + (bonusHours * 60 * 60)
-            
-            -- حفظ المفتاح، تفاصيل التليفون بالكامل، وقت التفعيل، ووقت الانتهاء بدقة داخل الملف
             pcall(function()
-                local fullData = enteredKey .. "|" .. currentDeviceProfile .. "|" .. currentTime .. "|" .. expireTimestamp
+                local fullData = enteredKey .. "|" .. currentDevice .. "|" .. currentTime .. "|" .. expireTimestamp
                 writefile(KEY_FILE, fullData)
             end)
             
@@ -141,15 +140,14 @@ if not isVerified then
             Gui:Destroy()
         else
             Box.Text = ""
-            Box.PlaceholderText = "Invalid Key! Try again..."
+            Box.PlaceholderText = "المفتاح غير صالح! حاول مجدداً..."
         end
     end)
 
     while not isVerified do task.wait(0.5) end
 end
 
--- 6. عرض اسم Yo Deals وسيرفر الديسكورد فوق الرأس بالخط الطبيعي
-print("Yo Deals: Tag module loading...")
+-- 6. عرض تاج Yo Deals وسيرفر الديسكورد فوق الرأس بطريقة خفيفة
 local function createYoDealsTag()
     local function addTag(char)
         local head = char:WaitForChild("Head", 5)
@@ -180,7 +178,7 @@ local function createYoDealsTag()
 end
 
 -- ============================================================
--- تشغيل المحرك والسكريبتات الأساسية لـ Yo Deals
+-- تشغيل المحرك والسكريبتات الأساسية بخفة تامة بدون ثقل
 -- ============================================================
 createYoDealsTag()
 
@@ -191,4 +189,4 @@ task.spawn(function()
     end)
 end)
 
-print("Yo Deals: Smart Security & Tracking Fully Active!")
+print("Yo Deals: Lightweight & Secured Engine Fully Active!")
