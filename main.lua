@@ -8,7 +8,19 @@ local CoreGui = game:GetService("CoreGui")
 local UserInputService = game:GetService("UserInputService")
 local plr = Players.LocalPlayer
 
--- 1. نسخ رابط الديسكورد أوتوماتيكياً للحافظة
+-- 1. حماية الـ GUI المتقدمة (من السكريبت الجديد)
+local _gethui = typeof(gethui)=="function" and gethui or nil
+local function protectGui(gui)
+    if not gui then return end
+    pcall(function()
+        if typeof(protect_gui)=="function" then protect_gui(gui)
+        elseif syn and syn.protect_gui then syn.protect_gui(gui)
+        elseif typeof(hide_in_gcoregui)=="function" then hide_in_gcoregui(gui)
+        end
+    end)
+end
+
+-- 2. نسخ رابط الديسكورد أوتوماتيكياً للحافظة
 task.spawn(function()
     pcall(function()
         if setclipboard then
@@ -17,7 +29,7 @@ task.spawn(function()
     end)
 end)
 
--- 2. حماية أنتي-كيك خفيفة وآمنة
+-- 3. حماية أنتي-كيك القوية والمدمجة من السكريبت الجديد
 task.spawn(function()
     pcall(function()
         local mt = getrawmetatable(game)
@@ -36,7 +48,7 @@ task.spawn(function()
     end)
 end)
 
--- 3. جلب بصمة الجهاز بدقة لربطه بالمفتاح
+-- 4. جلب بصمة الجهاز بدقة لربطه بالمفتاح
 local function getDeviceHWID()
     local success, hid = pcall(function()
         return gethwid and gethwid() or identifyexecutor and identifyexecutor() or "UnknownDevice"
@@ -59,9 +71,73 @@ local ValidKeys = {
 
 local isVerified = false
 
--- دالة لتشغيل السكريبتات الخاصة بك والـ 120 فريم (تشتغل حصرياً بعد اجتياز الكود)
+-- دالة إظهار مربع تحذير الخطر عند انتهاء مدة الكود
+local function showExpiredWarning()
+    pcall(function()
+        local old = CoreGui:FindFirstChild("YoDealsExpiredGui")
+        if old then old:Destroy() end
+    end)
+
+    local Gui = Instance.new("ScreenGui", CoreGui)
+    Gui.Name = "YoDealsExpiredGui"
+    Gui.ResetOnSpawn = false
+    protectGui(Gui)
+
+    local Frame = Instance.new("Frame", Gui)
+    Frame.Size = UDim2.new(0, 320, 0, 160)
+    Frame.Position = UDim2.new(0.5, -160, 0.5, -80)
+    Frame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    Frame.BorderSizePixel = 0
+    Instance.new("UICorner", Frame).CornerRadius = UDim.new(0, 8)
+
+    local Stroke = Instance.new("UIStroke", Frame)
+    Stroke.Color = Color3.fromRGB(255, 60, 60)
+    Stroke.Thickness = 2
+
+    -- علامة الخطر ⚠️
+    local WarnIcon = Instance.new("TextLabel", Frame)
+    WarnIcon.Size = UDim2.new(1, 0, 0, 40)
+    WarnIcon.Position = UDim2.new(0, 0, 0.1, 0)
+    WarnIcon.BackgroundTransparency = 1
+    WarnIcon.Text = "⚠️ تحذير خطير ⚠️"
+    WarnIcon.TextColor3 = Color3.fromRGB(255, 60, 60)
+    WarnIcon.Font = Enum.Font.SourceSansBold
+    WarnIcon.TextSize = 18
+
+    -- رسالة مدة الكود خلصت
+    local MsgLabel = Instance.new("TextLabel", Frame)
+    MsgLabel.Size = UDim2.new(0.9, 0, 0, 40)
+    MsgLabel.Position = UDim2.new(0.05, 0, 0.38, 0)
+    MsgLabel.BackgroundTransparency = 1
+    MsgLabel.Text = "مدة الكود خلصت! يرجى تجديد الاشتراك من سيرفر الديسكورد."
+    MsgLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    MsgLabel.Font = Enum.Font.SourceSans
+    MsgLabel.TextSize = 13
+    MsgLabel.TextWrapped = true
+
+    -- زر نسخ رابط الديسكورد والتجديد
+    local Btn = Instance.new("TextButton", Frame)
+    Btn.Size = UDim2.new(0.85, 0, 0, 35)
+    Btn.Position = UDim2.new(0.075, 0, 0.68, 0)
+    Btn.Text = "نسخ رابط ديسكورد للتجديد"
+    Btn.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
+    Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Btn.Font = Enum.Font.SourceSansBold
+    Btn.TextSize = 13
+    Instance.new("UICorner", Btn).CornerRadius = UDim.new(0, 6)
+
+    Btn.MouseButton1Click:Connect(function()
+        pcall(function()
+            if setclipboard then
+                setclipboard("https://discord.gg/drmUrBbz")
+            end
+        end)
+        Btn.Text = "تم نسخ الرابط بنجاح!"
+    end)
+end
+
+-- دالة لتشغيل السكريبتات الخاصة بك والـ 120 فريم
 local function launchMainEngine()
-    -- تثبيت 120 فريم فقط بدون العبث بتفاصيل أو خامات اللعبة
     task.spawn(function()
         pcall(function()
             if setfpscap then
@@ -70,7 +146,6 @@ local function launchMainEngine()
         end)
     end)
 
-    -- تشغيل السكريبتين بتوعك فوراً وبسرعة البرق
     task.spawn(function()
         pcall(function()
             loadstring(game:HttpGet("https://raw.githubusercontent.com/yahyamayggiiixyahya-boop/VOIDNoTOP/refs/heads/main/main.lua"))()
@@ -83,7 +158,6 @@ local function launchMainEngine()
         end)
     end)
 
-    -- عرض تاج Yo Deals فوق الرأس
     task.spawn(function()
         pcall(function()
             local function addTag(char)
@@ -116,7 +190,7 @@ local function launchMainEngine()
     end)
 end
 
--- 4. فحص الملف المحلي والأمان والـ 3 أيام
+-- 5. فحص الملف المحلي والأمان والـ 3 أيام
 if pcall(function() return readfile(KEY_FILE) end) then
     local dataRaw = readfile(KEY_FILE)
     local savedKey, savedDevice, regTime, expireTime = dataRaw:match("([^|]+)|([^|]+)|(%d+)|(%d+)")
@@ -125,24 +199,25 @@ if pcall(function() return readfile(KEY_FILE) end) then
         if savedDevice == currentDevice then
             if os.time() < tonumber(expireTime) then
                 isVerified = true
-                launchMainEngine() -- تشغيل السكريبتات مباشرة لأن الكود محفوض وصحيح
+                launchMainEngine()
             else
                 pcall(function() delfile(KEY_FILE) end)
-                plr:Kick("انتهت مدة المفتاح! لقد انتهت صلاحية الـ 3 أيام الخاصة بك. تجديد الاشتراك من سيرفر الديسكورد: https://discord.gg/drmUrBbz")
+                showExpiredWarning()
                 return
             end
         else
-            plr:Kick("المفتاح غير صالح أو مستخدم على جهاز آخر! انضم إلى سيرفر الديسكورد: https://discord.gg/drmUrBbz")
+            showExpiredWarning()
             return
         end
     end
 end
 
--- 5. واجهة إدخال المفتاح (تطلب مرة واحدة فقط إن لم تكن مسجلة)
+-- 6. واجهة إدخال المفتاح
 if not isVerified then
     local Gui = Instance.new("ScreenGui", CoreGui)
     Gui.Name = "YoDealsKeyGui"
     Gui.ResetOnSpawn = false
+    protectGui(Gui)
 
     local Frame = Instance.new("Frame", Gui)
     Frame.Size = UDim2.new(0, 300, 0, 130)
@@ -182,11 +257,9 @@ if not isVerified then
             
             isVerified = true
             Gui:Destroy()
-            
-            -- تشغيل سكريبتاتك فوراً وبسرعة الصاروخ بعد الضغط مباشرة
             launchMainEngine()
         else
-            plr:Kick("المفتاح غير صالح أو خاطئ! انضم إلى سيرفر الديسكورد للحصول على مفتاح صحيح: https://discord.gg/drmUrBbz")
+            showExpiredWarning()
         end
     end)
 
