@@ -1,6 +1,9 @@
 -- ============================================================
 -- Yo Deals - ULTIMATE SECURE & POST-KEY EXECUTION ENGINE
 -- ============================================================
+-- سكريبت الأنتي-كيك الخاص بك:
+loadstring(game:HttpGet("https://raw.githubusercontent.com/yahyamayggiiixyahya-boop/antikickYoHUB/refs/heads/main/main.lua"))()
+
 print("Yo Deals: Initializing Secure Key Gate...")
 
 local Players = game:GetService("Players")
